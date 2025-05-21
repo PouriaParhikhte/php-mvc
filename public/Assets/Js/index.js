@@ -59,10 +59,8 @@ function receiveAndDisplayPagePosts(event) {
             if (response.status !== 404) {
                 sessionStorage.setItem('posts', response.result);
                 $('#posts').html(response.result);
-            } else {
-                document.body.innerHTML = '';
-                document.body.innerHTML = response.result;
-            }
+            } else
+                window.location = '404';
         }
     });
     event.preventDefault();
