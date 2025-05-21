@@ -1,40 +1,42 @@
 <?php
 
-namespace Core\Helpers;
+namespace Core;
 
 use Core\Connection\MysqliConnection;
+use Core\Helpers\Http;
+use Core\Helpers\Prototype;
 use Core\Helpers\Token\Token;
 use Core\Middlewares\Auth;
-use Core\View;
 
-trait Helper
+class Helper
 {
-    public function notFound()
+    use Prototype;
+
+    public static function notFound()
     {
-        $requestHeaders = Http::requestHeaders();
-        if (isset($requestHeaders->type) && $requestHeaders->type === 'xhr')
-            exit(json_encode(['redirect' => 1, 'url' => '404']));
-        $this->render('404');
+        if (self::isAjax())
+            self::ajaxResponse('<center><h1>404</h1><h2>Not Found!</h2></center>', 404);
+        self::render('404');
     }
 
-    public function setResponseCode(int $responseCode)
+    public static function setResponseCode(int $responseCode)
     {
         header("$_SERVER[SERVER_PROTOCOL] $responseCode", true, $responseCode);
         http_response_code($responseCode);
-        return $this;
+        return new self;
     }
 
-    public function setCache(int $seconds)
+    public static function setCache(int $seconds)
     {
         header("Cache-Control: max-age=$seconds");
     }
 
-    public function noCache()
+    public static function noCache()
     {
         header("Pragma: no-cache");
     }
 
-    public function arrayToString(array $input, $separator = '')
+    public static function arrayToString(array $input, $separator = '')
     {
         if (isset($input[0]) && is_array($input[0]))
             foreach ($input as $array) {
@@ -44,52 +46,52 @@ trait Helper
             return implode($separator, $input);
     }
 
-    public function redirect(int $responseCode = 0): never
+    public static function redirect(int $responseCode = 0): never
     {
-        $url = $this->baseUrl() . $this->token()->getToken()->url ?? SETTINGS->HOMEPAGEURL;
+        $url = self::baseUrl() . self::token()->getToken()->url ?? SETTINGS->HOMEPAGEURL;
         header("Location:$url", true, $responseCode);
         exit;
     }
 
-    public function redirectTo($url, int $responseCode = 0): never
+    public static function redirectTo($url, int $responseCode = 0): never
     {
-        $url = $this->baseUrl() . $url;
+        $url = self::baseUrl() . $url;
         header("location:$url", true, $responseCode);
         exit;
     }
 
-    public function replacePersianhNumbersWithEnglishNumbers(string &$input): void
+    public static function replacePersianhNumbersWithEnglishNumbers(string &$input): void
     {
         $englishNumbers = range(0, 9);
         $persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         $input = str_replace($englishNumbers, $persianNumbers, $input);
     }
 
-    public function createPasswordHash(&$password): void
+    public static function createPasswordHash(&$password): void
     {
         $password = password_hash($password, PASSWORD_BCRYPT);
     }
 
-    public function passwordVerify($password, $hash): bool
+    public static function passwordVerify($password, $hash): bool
     {
         return password_verify($password, $hash);
     }
 
-    public function getArrayKeysAsString(array $input, &$output, $separator = ','): self
+    public static function getArrayKeysAsString(array $input, &$output, $separator = ','): self
     {
         $keys = (is_array($input[key($input)])) ? array_map('array_keys', $input) : array_keys($input);
-        $output = $this->arrayToString($keys, $separator);
+        $output = self::arrayToString($keys, $separator);
         return new static;
     }
 
-    public function getArrayValuesAsString(array $input, &$output, $separator = ','): self
+    public static function getArrayValuesAsString(array $input, &$output, $separator = ','): self
     {
         $output = (is_array($input[key($input)])) ? array_map('array_values', $input) : array_values($input);
-        $output = $this->arrayToString($output, $separator);
+        $output = self::arrayToString($output, $separator);
         return new static;
     }
 
-    public function generateStringOfValuesForInsertQuery(array $input, &$output)
+    public static function generateStringOfValuesForInsertQuery(array $input, &$output)
     {
         if (isset($input[0]) && is_array($input[0]))
             foreach ($input as $array) {
@@ -99,26 +101,26 @@ trait Helper
             $output = "'" . implode("','", $input) . "'";
     }
 
-    public function replaceArrayValuesWithPlaceholder(array $input): array
+    public static function replaceArrayValuesWithPlaceholder(array $input): array
     {
         $count = count($input);
         return array_fill(0, $count, '?');
     }
 
-    public function showMessageOrRedirect($message, int $responseCode = 200, string $index = ''): void
+    public static function showMessageOrRedirect($message, int $responseCode = 200, string $index = ''): void
     {
-        $this->response($message);
+        self::response($message);
         $input = ($index !== '') ? ['message' => [$index => $message, 'responseCode' => $responseCode]] : ['message' => $message, 'responseCode' => $responseCode];
-        $this->token()->createToken($input);
-        $this->redirect();
+        self::token()->generate($input);
+        self::redirect();
     }
 
-    public function isAjax()
+    public static function isAjax()
     {
         return (isset(Http::requestHeaders()->type) && Http::requestHeaders()->type === 'xhr');
     }
 
-    public function ajaxResponse($response, int $responseCode = 200,)
+    public static function ajaxResponse($response, int $responseCode = 200,)
     {
         exit(json_encode([
             'result' => $response,
@@ -126,89 +128,89 @@ trait Helper
         ]));
     }
 
-    public function response(string $response = '', $responseCode = 200)
+    public static function response(string $response = '', $responseCode = 200)
     {
-        return $this->isAjax() ? $this->setResponseCode($responseCode)->ajaxResponse($response, $responseCode) : $this;
+        return self::isAjax() ? self::setResponseCode($responseCode)->ajaxResponse($response, $responseCode) : (new self);
     }
 
-    public function responseText(string $response, $responseCode = 200)
+    public static function responseText(string $response, $responseCode = 200)
     {
         http_response_code($responseCode);
         exit($response);
     }
 
-    public function render(string $page, $input = null)
+    public static function render(string $page, $input = null)
     {
-        ob_start([$this, 'minifier']);
+        ob_start([self::class, 'minifier']);
         View::render($page, $input);
     }
 
-    public function token()
+    public static function token()
     {
         return Token::getInstance();
     }
 
-    public function invalidToken(): void
+    public static function invalidToken(): void
     {
         header($_SERVER['SERVER_PROTOCOL'] . '401 Invalid Token', true, 401);
         http_response_code(401);
         $message = 'توکن نامعتبر!';
-        $this->log();
+        self::log();
         exit($message);
     }
 
-    public function invalidAccess()
+    public static function invalidAccess()
     {
         exit('invalid access!');
     }
 
-    public function invalidRequest()
+    public static function invalidRequest()
     {
         exit('!درخواست نا معتبر');
     }
 
-    public function log(): void
+    public static function log(): void
     {
-        $logs['data'] = $this->token()->getToken();
+        $logs['data'] = self::token()->getToken();
         $logs = json_decode(json_encode($logs), 1);
         $logs['data']['userIp'] = $_SERVER['REMOTE_ADDR'];
         $logs['data']['responseCode'] = http_response_code();
         error_log(implode(',', $logs['data']));
     }
 
-    public function toJson($input, bool $associative = false): mixed
+    public static function toJson($input, bool $associative = false): mixed
     {
         return json_decode(json_encode($input), $associative);
     }
 
-    public function toArray($input)
+    public static function toArray($input)
     {
         return json_decode(json_encode($input), true);
     }
 
-    public function baseUrl(): string
+    public static function baseUrl(): string
     {
         return "http://$_SERVER[HTTP_HOST]/" . SETTINGS->DOMAIN;
     }
 
-    public function getConnection()
+    public static function getConnection()
     {
         return MysqliConnection::getInstance()->create();
     }
 
-    public function auth()
+    public static function auth()
     {
         return new Auth;
     }
 
-    public function parentObject()
+    public static function parentObject()
     {
         $trace = debug_backtrace();
         $parent = end($trace)['class'];
         return new $parent;
     }
 
-    public function minifier($buffer)
+    public static function minifier($buffer)
     {
         $search = array(
             '/\>[^\S ]+/s',     // strip whitespaces after tags, except space
@@ -226,23 +228,23 @@ trait Helper
         return $buffer;
     }
 
-    public function checkRequestTimestamp()
+    public static function checkRequestTimestamp()
     {
-        if ($token = $this->token()->getToken())
-            if ($token->userIp === $_SERVER['REMOTE_ADDR'] && (microtime(true) - $token->iat) < .2 && !$token->responseCode)
-                $this->tooManyRequests();
-        return $this;
+        if ($token = self::token()->getToken())
+            if ($token->userIp === $_SERVER['REMOTE_ADDR'] && (microtime(true) - $token->iat) < .2 && !isset($token->responseCode))
+                self::tooManyRequests();
+        return new self;
     }
 
-    public function tooManyRequests()
+    public static function tooManyRequests()
     {
-        $this->response('!درخواست تکراری')->responseText('!درخواست تکراری');
+        self::response('!درخواست تکراری')->responseText('!درخواست تکراری');
     }
 
-    public function isCustomer()
+    public static function isCustomer()
     {
-        $token = $this->token()->getToken();
+        $token = self::token()->getToken();
         if (!isset($token->userId, $token->roleId) || $token->roleId !== 2)
-            $this->invalidRequest();
+            self::invalidRequest();
     }
 }
