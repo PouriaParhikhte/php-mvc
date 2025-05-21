@@ -14,8 +14,10 @@ class Helper
 
     public static function notFound()
     {
-        if (self::isAjax())
-            self::ajaxResponse('<center><h1>404</h1><h2>Not Found!</h2></center>', 404);
+        if (self::isAjax()) {
+            self::token()->generate(['iat' => .1]);
+            self::ajaxResponse('', 404);
+        }
         self::render('404');
     }
 
