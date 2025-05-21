@@ -2,6 +2,7 @@
 
 namespace Core\Helpers\Token;
 
+use Core\Helper;
 use Core\Helpers\Prototype;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -11,7 +12,7 @@ class Token
     public static $token;
     use Prototype;
 
-    public function createToken(array $input = [])
+    public function generate(array $input = [])
     {
         self::$token = $input;
         $this->payload(self::$token);
@@ -95,7 +96,7 @@ class Token
                 !isset($token->responseCode) &&
                 (microtime(true) - $token->iat) < .2
             )
-                $this->tooManyRequests();
+                Helper::tooManyRequests();
         }
         return $this;
     }

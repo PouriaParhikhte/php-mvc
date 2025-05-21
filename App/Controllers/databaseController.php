@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use Core\Helpers\Prototype;
 use App\Models\Tables;
+use Core\Helper;
 
 class DatabaseController
 {
@@ -24,14 +25,14 @@ class DatabaseController
     public function drop()
     {
         $sql = "DROP DATABASE IF EXISTS " . SETTINGS->DATABASE;
-        if ($this->getConnection()->query($sql))
+        if (Helper::getConnection()->query($sql))
             exit('Dropped!');
     }
 
     public function truncate()
     {
         $sql = "TRUNCATE TABLE cache";
-        if ($this->getConnection()->query($sql))
-            $this->redirectTo(SETTINGS->HOMEPAGEURL);
+        if (Helper::getConnection()->query($sql))
+            Helper::redirectTo(SETTINGS->HOMEPAGEURL);
     }
 }

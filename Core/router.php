@@ -19,7 +19,7 @@ class router extends Route
 
     public function __construct($url)
     {
-        $this->checkRequestTimestamp();
+        Helper::checkRequestTimestamp();
         Token::$token = ['url' => $url, 'userIp' => $_SERVER['REMOTE_ADDR']];
 
         $urlComponents = explode('/', $url);
@@ -33,7 +33,7 @@ class router extends Route
     private function loadUrl($url)
     {
         match ($url) {
-            '404' => $this->notFound(),
+            '404' => Helper::notFound(),
             'create/database' => $this->loadControllerAndAction(DatabaseController::class, 'create'),
             'drop/database' => $this->loadControllerAndAction(DatabaseController::class, 'drop'),
             'cache/clear' => $this->loadControllerAndAction(DatabaseController::class, 'truncate'),
@@ -47,7 +47,7 @@ class router extends Route
             'customer/account' => Csrf::verifyToken() ?: Form::getInstance()->__invoke('customer')->checkSingleField('mobileNumber') ?: MobileNumberValidation::getInstance()->validate(),
             'customer/temporaryCode' => Csrf::verifyToken() ?: Form::getInstance()->__invoke('customer')->checkSingleField('temporaryCode') ?: TemporaryCode::getInstance()->verify(),
             'customer/login' => $this->loadControllerAndAction(CustomerAccountController::class, 'check'),
-            'customer/logout' => $this->isCustomer() ?: $this->loadControllerAndAction(CustomerLogoutController::class, 'logout')
+            'customer/logout' => Helper::isCustomer() ?: $this->loadControllerAndAction(CustomerLogoutController::class, 'logout')
         };
     }
 }

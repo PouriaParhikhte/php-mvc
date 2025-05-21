@@ -4,6 +4,7 @@ namespace Core\Helpers;
 
 use Core\Crud\InsertOrUpdate;
 use Core\Crud\Select;
+use Core\Helper;
 
 class Cache extends Select
 {
@@ -24,12 +25,12 @@ class Cache extends Select
     public function clear()
     {
         $this->sql->query = "TRUNCATE TABLE `$this->table`";
-        if ($this->getConnection()->query($this->sql->query)) {
+        if (Helper::getConnection()->query($this->sql->query)) {
             $curlhandle = curl_init(SETTINGS->BASEURL);
             curl_exec($curlhandle);
             curl_close($curlhandle);
             clearstatcache();
-            $this->redirect();
+            Helper::redirect();
         }
     }
 }

@@ -12,11 +12,11 @@ abstract class Controller
 
     public function __construct(mixed $input = '')
     {
-        $this->params = $this->toJson(explode('/', $input));
+        $this->params = Helper::toJson(explode('/', $input));
     }
 
     public function __destruct()
     {
-        $this->token()->createToken(Token::$token);
+        Helper::token()->generate(Token::$token);
     }
 }

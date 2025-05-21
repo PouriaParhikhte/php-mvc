@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Core\crud\Select;
+use Core\Helper;
 
 class Content extends Select
 {
@@ -15,8 +16,8 @@ class Content extends Select
 
     public function showPosts($url)
     {
-        if ((count($url) === 2 && !is_numeric(end($url))) || count($url) > 2 || null === $posts = $this->getContent($url[0]))
-            $this->notFound();
+        if ((count($url) >= 2 && !is_numeric(end($url))) || null === $posts = $this->getContent($url[0]))
+            Helper::notFound();
         ob_start();
         foreach ($posts->result as $post) {
             echo '<h2>' . $post->postTitle . '</h2>' . '<p>' . $post->postText . '</p>';

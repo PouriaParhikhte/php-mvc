@@ -2,6 +2,7 @@
 
 namespace Core\Helpers\mysqlClause;
 
+use Core\Helper;
 use Core\Model;
 
 class Clause extends Model
@@ -172,8 +173,8 @@ class Clause extends Model
 
     public function whereIn($column, array $values)
     {
-        $placeholder = $this->replaceArrayValuesWithPlaceholder($values);
-        $placeholder = $this->arrayToString($placeholder, ',');
+        $placeholder = Helper::replaceArrayValuesWithPlaceholder($values);
+        $placeholder = Helper::arrayToString($placeholder, ',');
         $this->sql->query .= " WHERE $column IN ($placeholder)";
         $this->values = array_values($values);
         return $this;
@@ -237,7 +238,7 @@ class Clause extends Model
         $resultLen = count($result['result']);
         if ($total > $resultLen)
             $result['pagination'] = $this->generatePageNumbers($total, $perPage, $pageNumber);
-        return $this->toJson($result, $toArray);
+        return Helper::toJson($result, $toArray);
     }
 
     private function checkPageNumber()

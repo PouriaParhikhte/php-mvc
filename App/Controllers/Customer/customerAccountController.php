@@ -4,6 +4,7 @@ namespace App\Controllers\Customer;
 
 use App\Models\Customer\CustomerAccount;
 use Core\Controller;
+use Core\Helper;
 use Exception;
 
 class CustomerAccountController extends Controller
@@ -11,11 +12,17 @@ class CustomerAccountController extends Controller
     public function check(CustomerAccount $customerAccount)
     {
         try {
-            if ($customer = $customerAccount->loginOrRegister($this->token()->getToken()->mobileNumber))
-                $this->token()->createToken(['userId' => $customer->customerId, 'roleId' => $customer->roleId, 'temporaryCode' => null, 'csrf' => null, 'mobileNumber' => null]);
-            $this->response('customer')->redirect();
+            if ($customer = $customerAccount->loginOrRegister(Helper::token()->getToken()->mobileNumber))
+                Helper::token()->generate([
+                    'userId' => $customer->customerId,
+                    'roleId' => $customer->roleId,
+                    'temporaryCode' => null,
+                    'csrf' => null,
+                    'mobileNumber' => null
+                ]);
+            Helper::response('customer')->redirect();
         } catch (Exception $exception) {
-            $this->showMessageOrRedirect($exception->getMessage(), $exception->getCode());
+            Helper::showMessageOrRedirect($exception->getMessage(), $exception->getCode());
         }
     }
 }

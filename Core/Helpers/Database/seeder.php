@@ -4,12 +4,9 @@ namespace Core\Helpers\Database;
 
 use Core\Crud\Insert;
 use Core\Crud\Select;
-use Core\Helpers\Helper;
 
 class Seeder
 {
-    use Helper;
-
     public static function url(): void
     {
         $urls = [

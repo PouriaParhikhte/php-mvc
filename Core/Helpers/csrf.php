@@ -2,6 +2,7 @@
 
 namespace Core\Helpers;
 
+use Core\Helper;
 use Core\Helpers\Token\Token;
 
 class Csrf
@@ -19,7 +20,7 @@ class Csrf
     {
         $request = Http::request();
         $message = 'Invalid token!';
-        if (!isset($request->csrf) || $request->csrf != (new self)->token()->getToken()->csrf) (new self)->response($message)->responseText($message);
+        if (!isset($request->csrf) || $request->csrf != Helper::token()->getToken()->csrf) Helper::response($message)->responseText($message);
     }
 
     public static function addTokenFieldintoFormElement(&$form)

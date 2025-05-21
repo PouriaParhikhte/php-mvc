@@ -3,6 +3,7 @@
 namespace Core\Connection;
 
 use App\Controllers\DatabaseController;
+use Core\Helper;
 use Core\Helpers\Database\DatabaseManagementSystem;
 use Core\Helpers\Prototype;
 use Exception;
@@ -42,7 +43,7 @@ class MysqliConnection
                 if ($result = self::$connection->execute_query($this->sql->query, $this->values))
                     if (isset($this->sql->type) && $this->sql->type === 'select') {
                         $this->values = [];
-                        return $this->toJson($result->fetch_all(1));
+                        return Helper::toJson($result->fetch_all(1));
                     }
                 return $result;
             }
@@ -54,7 +55,7 @@ class MysqliConnection
     public function fetchResult()
     {
         $result = self::$connection->query($this->sql->query);
-        return $this->toJson($result->fetch_all(1));
+        return Helper::toJson($result->fetch_all(1));
     }
 
     public function result()

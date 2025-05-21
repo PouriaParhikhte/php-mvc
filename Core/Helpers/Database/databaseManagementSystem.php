@@ -8,7 +8,7 @@ use stdClass;
 
 class DatabaseManagementSystem extends Model
 {
-    // use Prototype;
+    use Prototype;
 
     private $databaseName, $columnName, $columnNameWithPrefix;
 

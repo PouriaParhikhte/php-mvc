@@ -4,7 +4,6 @@ namespace Core\Helpers;
 
 trait Prototype
 {
-    use Helper;
     private static $instance = [];
 
     public static function getInstance(mixed $input = null): object

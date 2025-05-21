@@ -2,6 +2,7 @@
 
 namespace Core\Helpers;
 
+use Core\Helper;
 use Exception;
 
 class Form
@@ -23,14 +24,14 @@ class Form
             if (array_diff($columns, $keys))
                 throw new Exception('فیلد(های) فرم نامعتبر میباشد!', 302);
         } catch (Exception $exception) {
-            $this->showMessageOrRedirect($exception->getMessage(), $exception->getCode());
+            Helper::showMessageOrRedirect($exception->getMessage(), $exception->getCode());
         }
     }
 
     public function getTableColumnsName($guards = []): array
     {
         $sql = "SHOW COLUMNS FROM $this->table";
-        $fields = $this->getConnection()->query($sql)->fetch_all(1);
+        $fields = Helper::getConnection()->query($sql)->fetch_all(1);
         $fields = array_column($fields, 'Field');
         if (!empty($guards))
             $fields = array_diff($fields, $guards);
@@ -43,7 +44,7 @@ class Form
             if (!property_exists(Http::request(), $fieldName))
                 throw new Exception('فیلد(های) فرم نامعتبر میباشد!', 302);
         } catch (Exception $exception) {
-            $this->showMessageOrRedirect($exception->getMessage(), $exception->getCode());
+            Helper::showMessageOrRedirect($exception->getMessage(), $exception->getCode());
         }
     }
 }

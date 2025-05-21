@@ -56,11 +56,13 @@ function receiveAndDisplayPagePosts(event) {
         data: { url: event.target.getAttribute('href') },
         success: function (response) {
             response = JSON.parse(response);
-            if (response.result !== undefined) {
+            if (response.status !== 404) {
                 sessionStorage.setItem('posts', response.result);
                 $('#posts').html(response.result);
-            } else
-                window.location.href = '404';
+            } else {
+                document.body.innerHTML = '';
+                document.body.innerHTML = response.result;
+            }
         }
     });
     event.preventDefault();

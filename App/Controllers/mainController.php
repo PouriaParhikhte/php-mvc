@@ -6,6 +6,7 @@ use App\Models\Content;
 use App\Models\CustomerAccountForm;
 use App\Models\TemporaryCodeForm;
 use Core\Controller;
+use Core\Helper;
 use Core\Helpers\Cache;
 use Core\Helpers\Csrf;
 use Core\Menu\SiteMenu;
@@ -18,7 +19,7 @@ class MainController extends Controller
     {
         try {
             $data->token = $this->pageMenuAndContent($data)->getHtmlElements($data->elements)->token()->getToken();
-            $this->response($data->posts)->render($this->params[0], $data);
+            Helper::response($data->posts)->render($this->params[0], $data);
         } catch (Exception) {
             DatabaseController::create();
         }
@@ -37,11 +38,11 @@ class MainController extends Controller
 
     private function getHtmlElements(&$output)
     {
-        if (!$this->token()->isLogged()) {
-            $output = !isset($this->token()->getToken()->temporaryCode) ? CustomerAccountForm::fetch() : TemporaryCodeForm::fetch();
-            if (!$this->isAjax())
+        if (!Helper::token()->isLogged()) {
+            $output = !isset(Helper::token()->getToken()->temporaryCode) ? CustomerAccountForm::fetch() : TemporaryCodeForm::fetch();
+            if (!Helper::isAjax())
                 Csrf::addTokenFieldintoFormElement($output->tags);
         }
-        return $this;
+        return Helper::getInstance();
     }
 }
